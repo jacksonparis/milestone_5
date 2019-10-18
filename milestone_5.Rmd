@@ -25,9 +25,9 @@ I decided to go a different direction, and with new data. CITES is an organizati
 For the future, I might look at the most popular genuses to be exported from certain countries over time, or the ratio between imports and exports for certain countries, countries with highest overall importing and exporting, etc. 
 
 ```{r, echo = FALSE}
-CITES_orchid <- bind_rows(orchidlist) %>%
-separate(Taxon, into = c("Genus", "Species"), sep = " ", extra = "merge") %>%
-  select("Year", "Genus", "Species", "Importer", "Exporter", "Importer reported quantity", "Exporter reported quantity", "Term", "Unit")
+CITES_orchid <- bind_rows(orchidlist) %>% mutate(Taxon2 = Taxon) %>% 
+separate(Taxon2, into = c("Genus", "Species"), sep = " ", extra = "merge") %>%
+  select("Year", "Taxon", "Genus", "Species", "Importer", "Exporter", "Importer reported quantity", "Exporter reported quantity", "Term", "Unit")
 ```
 
 ```{r, echo = FALSE}
@@ -49,6 +49,11 @@ ggplot(US_imports, aes(x = reorder(Exporter, -Counts), y = Counts)) + geom_col()
 
 IUCN_assessments <- read_xlsx("~/Desktop/redlist_orchid_data/assessments.xlsx")
 IUCN_taxonomy <- read_xlsx("~/Desktop/redlist_orchid_data/taxonomy.xlsx")
+IUCN_orchids <- IUCN_assessments %>% inner_join(IUCN_taxonomy, by = c("internalTaxonId", "scientificName"))
+```
 
+```{r}
+#Can I somehow combine these tables? We're about to find out...
+all_table <- CITES_orchid %>% inner_join(IUCN_orchids, by = c("Taxon" = "scientificName"))
 ```
 
