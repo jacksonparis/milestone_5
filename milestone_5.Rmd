@@ -1,0 +1,54 @@
+---
+title: "milestone_5"
+author: "Jackson Kehoe"
+date: "10/18/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(readxl)
+
+```
+
+```{r, include = FALSE}
+setwd("~/Desktop/milestone_4/orchidtrade.exceldata")
+xlsxdata = list.files(pattern="*.xlsx")
+orchidlist = lapply(xlsxdata, read_xlsx)
+```
+
+**My data** <br/>
+I decided to go a different direction, and with new data. CITES is an organization that records data pertaining to international transactions of wild plants and animals. I downloaded the data on all plants in the family Orchidaceae (Orchids) since 1975 (the earliest year in their records). I thought this data would be interesting to look at, as it contains information on the orchid species (or at least the genus), as well as where it came from and where it went (along with some other data). I've made a graph showing the top 10 most popular importers into the United States, by totaling counts of recorded imports over the past four years. 
+
+**Other Plans**
+For the future, I might look at the most popular genuses to be exported from certain countries over time, or the ratio between imports and exports for certain countries, countries with highest overall importing and exporting, etc. 
+
+```{r, echo = FALSE}
+CITES_orchid <- bind_rows(orchidlist) %>%
+separate(Taxon, into = c("Genus", "Species"), sep = " ", extra = "merge") %>%
+  select("Year", "Genus", "Species", "Importer", "Exporter", "Importer reported quantity", "Exporter reported quantity", "Term", "Unit")
+```
+
+```{r, echo = FALSE}
+
+US_imports <- CITES_orchid %>%
+  filter(Importer == "US") %>%
+  filter(Year %in% 2014:2018) %>%
+  group_by(Exporter) %>%
+  summarize(Counts = length(Exporter)) %>%
+  arrange(desc(Counts)) %>%
+  head(10)
+
+ggplot(US_imports, aes(x = reorder(Exporter, -Counts), y = Counts)) + geom_col() + labs(x = "Countries that have exported orchids to US", y = "Recorded exports to US since 2014", title = "From where does the US import orchids?")
+```
+
+```{r}
+#New Data Alert!!
+#I found some cool data about orchids on the IUCN Red List. This is an online database full of different species (not just orchids), their current extinction risks, and a whole lot of other useful information.
+
+IUCN_assessments <- read_xlsx("~/Desktop/redlist_orchid_data/assessments.xlsx")
+IUCN_taxonomy <- read_xlsx("~/Desktop/redlist_orchid_data/taxonomy.xlsx")
+
+```
+
